@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,12 +10,17 @@ namespace WilGame._Scripts.Players
         [SerializeField] private HorizontalLayoutGroup layoutGroup;
         [SerializeField] private PlayerIndicator playerIndicatorPrefab;
         
-        private PlayerIndicator[] playerIndicators;
+        private List<PlayerIndicator> playerIndicators;
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            
+            PlayerManager.Instance.GetPlayersServerRpc(out Players players);
+            playerIndicators = new List<PlayerIndicator>(players.PlayersList.Count);
+            foreach (Player player in players.PlayersList)
+            {
+                AddPlayerIndicator(player);
+            }
         }
         
         private void AddPlayerIndicator(Player player)
@@ -22,7 +28,7 @@ namespace WilGame._Scripts.Players
             PlayerIndicator indicator = Instantiate(playerIndicatorPrefab, layoutGroup.transform);
             indicator.SetName(player.Name);
             indicator.SetStatus(player.CurrentStatus);
-            playerIndicators = layoutGroup.GetComponentsInChildren<PlayerIndicator>();
+            playerIndicators.Add(indicator);
         }
         
         
